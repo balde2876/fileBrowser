@@ -1,6 +1,6 @@
 {
-	"driveRoot":"C:",
-	"driveAccessRoot":"C:",
+	"driveRoot":"D:/Media",
+	"driveAccessRoot":"D:/Media",
 	"iconImageRoot":"img/",
 	"defaultIcon":"genericFile.png",
 	"folderIcon":"folder.png",

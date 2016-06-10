@@ -111,72 +111,23 @@ $groupSettings = json_decode($json,true)[$_SESSION["group"]];
 $icons = $settings['icons'];
 $fileExtensions = $settings['fileExtensions'];
 $driveRoot = "";
-if (isset($_GET['ri'])){
-$driveRoot = $groupSettings['rootDirectories'][$_GET['ri']];
-} else {
-$driveRoot = $groupSettings['rootDirectories'][$groupSettings['defaultRootIndex']];
-}
 $iconImageRoot = $settings['iconImageRoot'];
 $defaultIcon = $settings['defaultIcon'];
 $folderIcon = $settings['folderIcon'];
-$dir = $driveRoot;
-if (isset($_GET['filepos'])){
-$dir = $driveRoot.$_GET['filepos'];
-} else {
-$_GET['filepos'] = "";
-}
-$breadcrumbs = explode("\\", $_GET['filepos']);
-$i = 1;
 
 echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='driveselector.php'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>Drives<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img></h3></a>";
-foreach ($breadcrumbs as &$value) {
-	$value1 = $value;
-	if ($i == 1) {
-		$value1 = $driveRoot;
-	}
-	if ($i < count($breadcrumbs)){
-		echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='index.php?filepos=".implode("\\", array_slice($breadcrumbs,0,$i))."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1."<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img>";
-	} else {
-		echo "<a style='position:relative;top:5px;height:36px;display:inline;padding-right:5px;' href='index.php?filepos=".implode("\\", array_slice($breadcrumbs,0,$i))."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1;
-	}
-	echo "</h3></a>";
-	$i = $i + 1;
-}
 echo '</div></div><div style="width:100%;background-color: #eeeeee; position:absolute; 
 top: 67px; z-index:0; left: 0px; height: 32px;">
-<p style="color:#444444;position:absolute;top:4px;left:64px;">Name</p><p style="color:#444444;position:absolute;right:50px;width:50px;top:4px;">Size</p></div>';
+<p style="color:#444444;position:absolute;top:4px;left:64px;">Name</p></div>';
 
-$files1 = scandir($dir);
+$files1 = $groupSettings['rootDirectories'];
+$i = 0;
 foreach ($files1 as &$value) {
-	$filepathpieces = explode("\\", $value);
-    $filepieces = explode(".", end($filepathpieces));
-	$desthref = "index.php?filepos=".$_GET['filepos']."\\".$value;
-	$icon = $defaultIcon;
-	$fileSize = "";
-	if (array_key_exists(end($filepieces), $fileExtensions)) {
-		$icon = $icons[$fileExtensions[end($filepieces)]];
-	}
-	if ($value == ".."){
-		$temp1 = explode("\\",$_GET['filepos']);
-		array_pop($temp1);
-		$desthref = "index.php?filepos=".implode("\\", $temp1);
-	}
-	if (is_dir($driveRoot.$_GET['filepos']."\\".$value)){
-		$icon = $folderIcon;
-	} else {
-		$desthref = "getFile.php?path=".$driveRoot.$_GET['filepos']."\\".$value;
-		//$fileSizeRaw = filesize($driveAccessRoot.$_GET['filepos']."\\".$value);
-		$fileSize = human_filesize(filesize64($driveRoot.$_GET['filepos']."\\".$value));
-	}
-	if ($value == "."){
-		
-	} else {
-		echo "<div style='position:relative;top:0px;left:0px;width:100%;height:32px;'>";
-		echo "<a href='".$desthref."' style='position:absolute;top:5px;left:40px;'>".$value."</a>";
-		echo "<img style='position:absolute;top:0px;left:0px;width:32px;height:32px;' src='".$iconImageRoot.$icon."'></img>";
-		echo "<p style='color:#444444;position:absolute;right:26px;width:50px;top:4px;'>".$fileSize."</p>";
-		echo "</div>";
-	}
+	echo "<div style='position:relative;top:0px;left:0px;width:100%;height:32px;'>";
+	echo "<a href='index.php?ri=".$i."' style='position:absolute;top:5px;left:40px;'>".$value."</a>";
+	echo "<img style='position:absolute;top:0px;left:0px;width:32px;height:32px;' src='img/drive.png'></img>";
+	echo "</div>";
+	$i = $i + 1;
 }
 
 echo '<div style="width:100%;background-color: #eeeeee; position:absolute; 

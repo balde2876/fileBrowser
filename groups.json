@@ -1,0 +1,10 @@
+{
+	"USERS":{
+		"rootDirectories":["D:/Media", "C:/"],
+		"defaultRootIndex":1,
+		"permissions":{
+			"C:/":["READ"],
+			"D:/Media":["READ","WRITE"]
+		}
+	}
+}

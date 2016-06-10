@@ -1,0 +1,2 @@
+passwords in users.json are SHA512 hashes
+guer guest's password is 1234
