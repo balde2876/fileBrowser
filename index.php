@@ -1,5 +1,6 @@
 <?php
 session_start();
+if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -120,12 +121,12 @@ $iconImageRoot = $settings['iconImageRoot'];
 $defaultIcon = $settings['defaultIcon'];
 $folderIcon = $settings['folderIcon'];
 $dir = $driveRoot;
-if (isset($_GET['filepos'])){
-$dir = $driveRoot.$_GET['filepos'];
+if (isset($_GET['f'])){
+$dir = $driveRoot.$_GET['f'];
 } else {
-$_GET['filepos'] = "";
+$_GET['f'] = "";
 }
-$breadcrumbs = explode("\\", $_GET['filepos']);
+$breadcrumbs = explode("\\", $_GET['f']);
 $i = 1;
 
 echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='driveselector.php'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>Drives<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img></h3></a>";
@@ -134,10 +135,14 @@ foreach ($breadcrumbs as &$value) {
 	if ($i == 1) {
 		$value1 = $driveRoot;
 	}
+	$end = "";
+	if (isset($_GET['ri'])){
+		$end = "&ri=".$_GET['ri'];
+	}
 	if ($i < count($breadcrumbs)){
-		echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='index.php?filepos=".implode("\\", array_slice($breadcrumbs,0,$i))."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1."<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img>";
+		echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='index.php?f=".implode("\\", array_slice($breadcrumbs,0,$i)).$end."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1."<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img>";
 	} else {
-		echo "<a style='position:relative;top:5px;height:36px;display:inline;padding-right:5px;' href='index.php?filepos=".implode("\\", array_slice($breadcrumbs,0,$i))."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1;
+		echo "<a style='position:relative;top:5px;height:36px;display:inline;padding-right:5px;' href='index.php?f=".implode("\\", array_slice($breadcrumbs,0,$i)).$end."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1;
 	}
 	echo "</h3></a>";
 	$i = $i + 1;
@@ -150,23 +155,33 @@ $files1 = scandir($dir);
 foreach ($files1 as &$value) {
 	$filepathpieces = explode("\\", $value);
     $filepieces = explode(".", end($filepathpieces));
-	$desthref = "index.php?filepos=".$_GET['filepos']."\\".$value;
+	if (isset($_GET['ri'])){
+		$desthref = "index.php?f=".$_GET['f']."\\".$value."&ri=".$_GET['ri'];
+	} else {
+		$desthref = "index.php?f=".$_GET['f']."\\".$value;
+	}
 	$icon = $defaultIcon;
 	$fileSize = "";
 	if (array_key_exists(end($filepieces), $fileExtensions)) {
 		$icon = $icons[$fileExtensions[end($filepieces)]];
 	}
 	if ($value == ".."){
-		$temp1 = explode("\\",$_GET['filepos']);
+		$temp1 = explode("\\",$_GET['f']);
 		array_pop($temp1);
-		$desthref = "index.php?filepos=".implode("\\", $temp1);
+		if ($value == ".."){
+			if (isset($_GET['ri'])){
+				$desthref = "index.php?f=".implode("\\", $temp1)."&ri=".$_GET['ri'];
+			} else {
+				$desthref = "index.php?f=".implode("\\", $temp1);
+			}
+		}
 	}
-	if (is_dir($driveRoot.$_GET['filepos']."\\".$value)){
+	if (is_dir($driveRoot.$_GET['f']."\\".$value)){
 		$icon = $folderIcon;
 	} else {
-		$desthref = "getFile.php?path=".$driveRoot.$_GET['filepos']."\\".$value;
+		$desthref = "getFile.php?path=".$driveRoot.$_GET['f']."\\".$value;
 		//$fileSizeRaw = filesize($driveAccessRoot.$_GET['filepos']."\\".$value);
-		$fileSize = human_filesize(filesize64($driveRoot.$_GET['filepos']."\\".$value));
+		$fileSize = human_filesize(filesize64($driveRoot.$_GET['f']."\\".$value));
 	}
 	if ($value == "."){
 		
