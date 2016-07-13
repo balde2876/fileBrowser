@@ -7,7 +7,7 @@ if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTT
 <head>
 <title>File Browser</title>
 <link rel="icon" type="image/png" href="icon.png">
-<script src="//code.jquery.com/jquery-1.12.0.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <meta id="viewport" name="viewport" content="width=500">
 <style>
 @import url(styleSheet.css);
@@ -30,16 +30,16 @@ if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTT
 </style>
 
 </head>
-<body>
+<body oncontextmenu="return false">
 
 <div class="material" id="jss001" style="width:calc(100% - 68px);background-color: #ffffff; position:absolute; top: 10px; left:10px; overflow: hidden; z-index:1;
 padding-left:24px;padding-top:122px;padding-bottom:52px;padding-right:24px;
 margin-bottom:10px;
 ">
-<div style="width:100%;background-color: #444444; position:absolute; 
+<div style="width:100%;background-color: #444444; position:absolute;
 top: 0px; z-index:0; height:67px; left: 0px;
 ">
-<div style="height:36px;position:absolute; 
+<div style="height:36px;position:absolute;
 top: 0px; z-index:0; left: 0px;
 padding-left:24px;padding-top:12px;padding-bottom:19px;padding-right:24px;
 margin-bottom:0px;
@@ -93,7 +93,7 @@ function filesize64($file)
 }
 //This function was taken from http://jeffreysambells.com/2012/10/25/human-readable-filesize-php
 //Author:                      Jeffrey Sambells
-function human_filesize($bytes, $dec = 2) 
+function human_filesize($bytes, $dec = 2)
 {
     $size   = array('B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
     $factor = floor((strlen($bytes) - 1) / 3);
@@ -109,97 +109,241 @@ $f1 = fopen("groups.json", "r") or die("No groups file");
 $json = fread($f1,filesize("groups.json"));
 fclose($f1);
 $groupSettings = json_decode($json,true)[$_SESSION["group"]];
+$allPermissions = $groupSettings['permissions'];
+$permissions = [];
+
+
+//
 $icons = $settings['icons'];
 $fileExtensions = $settings['fileExtensions'];
-$driveRoot = "";
-if (isset($_GET['ri'])){
-$driveRoot = $groupSettings['rootDirectories'][$_GET['ri']];
-} else {
-$driveRoot = $groupSettings['rootDirectories'][$groupSettings['defaultRootIndex']];
-}
 $iconImageRoot = $settings['iconImageRoot'];
 $defaultIcon = $settings['defaultIcon'];
 $folderIcon = $settings['folderIcon'];
-$dir = $driveRoot;
+$dir = "";
 if (isset($_GET['f'])){
-$dir = $driveRoot.$_GET['f'];
+$dir = str_replace(array("///fstp///","/"),array(".","\\"),$_GET['f']);
 } else {
-$_GET['f'] = "";
+$dir = "";
 }
-$breadcrumbs = explode("\\", $_GET['f']);
+$breadcrumbs = explode("\\", str_replace("/","\\",$dir));
 $i = 1;
-
+$temp1 = "";
 echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='driveselector.php'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>Drives<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img></h3></a>";
 foreach ($breadcrumbs as &$value) {
 	$value1 = $value;
-	if ($i == 1) {
-		$value1 = $driveRoot;
-	}
 	$end = "";
-	if (isset($_GET['ri'])){
-		$end = "&ri=".$_GET['ri'];
-	}
 	if ($i < count($breadcrumbs)){
 		echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='index.php?f=".implode("\\", array_slice($breadcrumbs,0,$i)).$end."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1."<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img>";
 	} else {
 		echo "<a style='position:relative;top:5px;height:36px;display:inline;padding-right:5px;' href='index.php?f=".implode("\\", array_slice($breadcrumbs,0,$i)).$end."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1;
 	}
 	echo "</h3></a>";
+	$temp1 = $temp1.$value1."/";
+	if (array_key_exists($temp1, $allPermissions)) {
+		$permissions = $allPermissions[$temp1];
+	}
 	$i = $i + 1;
 }
-echo '</div></div><div style="width:100%;background-color: #eeeeee; position:absolute; 
+
+echo "<p id='groupPermissionsJson' hidden>".json_encode($permissions)."</p>";
+//echo "<p id='groupPermissionsJson' hidden>".$permissions."</p>";
+echo '</div></div><div style="width:100%;background-color: #eeeeee; position:absolute;
 top: 67px; z-index:0; left: 0px; height: 32px;">
 <p style="color:#444444;position:absolute;top:4px;left:64px;">Name</p><p style="color:#444444;position:absolute;right:50px;width:50px;top:4px;">Size</p></div>';
+if (in_array("LIST",$permissions)){
 
-$files1 = scandir($dir);
-foreach ($files1 as &$value) {
-	$filepathpieces = explode("\\", $value);
-    $filepieces = explode(".", end($filepathpieces));
-	if (isset($_GET['ri'])){
-		$desthref = "index.php?f=".$_GET['f']."\\".$value."&ri=".$_GET['ri'];
-	} else {
-		$desthref = "index.php?f=".$_GET['f']."\\".$value;
-	}
-	$icon = $defaultIcon;
-	$fileSize = "";
-	if (array_key_exists(end($filepieces), $fileExtensions)) {
-		$icon = $icons[$fileExtensions[end($filepieces)]];
-	}
-	if ($value == ".."){
-		$temp1 = explode("\\",$_GET['f']);
-		array_pop($temp1);
-		if ($value == ".."){
-			if (isset($_GET['ri'])){
-				$desthref = "index.php?f=".implode("\\", $temp1)."&ri=".$_GET['ri'];
-			} else {
-				$desthref = "index.php?f=".implode("\\", $temp1);
-			}
+  $logfile = fopen($_SESSION["logfile"], "a");
+  fwrite($logfile, "   LIST at ".date('H:i:s')." on ".date('d F Y')."\r\n");
+  fwrite($logfile, "      Directory : ".$dir."\r\n");
+  fclose($logfile);
+
+	$files1 = scandir($dir);
+	$fid = 0;
+	foreach ($files1 as &$value) {
+		$filetype = "file";
+		$filepathpieces = explode("\\", $value);
+		$filepieces = explode(".", end($filepathpieces));
+		$icon = $defaultIcon;
+		$fileSize = "";
+		if (array_key_exists(end($filepieces), $fileExtensions)) {
+			$icon = $icons[$fileExtensions[end($filepieces)]];
 		}
+		if (is_dir($dir."\\".$value)){
+			$icon = $folderIcon;
+			$filetype = "folder";
+		} else {
+			$desthref = "getFile.php?path=".$dir."\\".$value;
+			//$fileSizeRaw = filesize($driveAccessRoot.$_GET['filepos']."\\".$value);
+			$fileSize = human_filesize(filesize64($dir."\\".$value));
+		}
+		$actFile = str_replace(array("'",'"',"=","?","&","."),array("///aphe///","///quot///","///equa///","///ques///","///amps///","///fstp///"),str_replace("\\","/",$dir."/".$value));
+		if (($value == ".") or ($value == "..")){
+
+		} else {
+			echo "<div style='position:relative;top:0px;left:0px;width:100%;height:32px;'>";
+			echo "<a id='link".$fid."' onclick='clickAction(".'"'.$actFile.'","'.$filetype.'"'.")' oncontextmenu='cMenu(".'"'.$actFile.'",'.$fid.',"'.$filetype.'","'.$value.'"'.");return false;' style='position:absolute;top:5px;left:40px;'>".$value."</a>";
+			echo "<img style='position:absolute;top:0px;left:0px;width:32px;height:32px;' src='".$iconImageRoot.$icon."'></img>";
+			echo "<p style='color:#444444;position:absolute;right:26px;width:50px;top:4px;'>".$fileSize."</p>";
+			echo "</div>";
+		}
+		$fid = $fid + 1;
 	}
-	if (is_dir($driveRoot.$_GET['f']."\\".$value)){
-		$icon = $folderIcon;
+
+
+} else {
+  $logfile = fopen($_SESSION["logfile"], "a");
+  fwrite($logfile, "   DENIED LIST at ".date('H:i:s')." on ".date('d F Y')."\r\n");
+  fwrite($logfile, "      Directory : ".$dir."\r\n");
+  fclose($logfile);
+
+	echo "<h3>You do not have list permissions for this folder</h3>";
+}
+echo '<div style="width:100%;background-color: #eeeeee; position:absolute;
+bottom: 0px; z-index:0; left: 0px; height: 32px;">
+<p style="color:#444444;position:absolute;top:4px;left:64px;">Logged in as account '.$_SESSION['user'].' in group '.$_SESSION['group'].' </p><a style="color:#444444;position:absolute;right:50px;width:50px;top:4px;" href="logoutscript.php">Logout</a></div>';
+?>
+</div>
+
+<div id="renameFileMenu" class="material" style="position:absolute;top:100px;left:20px;width:0px;height:0px;z-index:50;background-color:#ffffff;">
+  <input style="position:absolute;margin-top:0px;top:5px;left:5px;width:150px;" id="renameFileMenuInput" value="meme" class="field"></input>
+</div>
+
+<div id="contextualMenu" class="material" style="position:absolute;top:100px;left:20px;width:0px;height:0px;z-index:50;background-color:#ffffff;">
+	<a id="cMenu1" href=""><div id="dcMenu1" style="position:absolute;top:0px;left:0px;width:100%;height:48px;background-color:#ffffff;color:#000000;">
+		<p style="position:absolute;top:12px;left:16px;">Download</p>
+		<div style="position:absolute;top:47px;left:0px;width:100%;height:1px;background-color:#dddddd;"></div>
+	</div></a>
+	<a id="cMenu2"><div id="dcMenu2" style="position:absolute;top:48px;left:0px;width:100%;height:48px;background-color:#eeeeee;color:#888888;">
+		<p style="position:absolute;top:12px;left:16px;">Rename</p>
+		<div style="position:absolute;top:47px;left:0px;width:100%;height:1px;background-color:#dddddd;"></div>
+	</div></a>
+	<a id="cMenu3" href=""><div id="dcMenu3" style="position:absolute;top:96px;left:0px;width:100%;height:48px;background-color:#eeeeee;color:#888888;">
+		<p style="position:absolute;top:12px;left:16px;">Copy</p>
+		<div style="position:absolute;top:47px;left:0px;width:100%;height:1px;background-color:#dddddd;"></div>
+	</div></a>
+	<a id="cMenu4" href=""><div id="dcMenu4" style="position:absolute;top:144px;left:0px;width:100%;height:48px;background-color:#eeeeee;color:#888888;">
+		<p style="position:absolute;top:12px;left:16px;">Paste</p>
+		<div style="position:absolute;top:47px;left:0px;width:100%;height:1px;background-color:#dddddd;"></div>
+	</div></a>
+	<a id="cMenu5" href=""><div id="dcMenu5" style="position:absolute;top:192px;left:0px;width:100%;height:48px;background-color:#eeeeee;color:#888888;">
+		<p style="position:absolute;top:12px;left:16px;">Delete</p>
+		<div style="position:absolute;top:47px;left:0px;width:100%;height:1px;background-color:#dddddd;"></div>
+	</div></a>
+</div>
+
+<script>
+document.addEventListener("click", CloseCMenu);
+px = 20;
+py = 20;
+$( document ).on( "mousemove", function( event ) {
+	px = event.pageX;
+	py = event.pageY;
+});
+permissions = JSON.parse($("#groupPermissionsJson").text())
+for (i = 0; i < permissions.length; i++) {
+    console.log(permissions[i]);
+}
+
+function isInArray(value, array) {
+  return array.indexOf(value) > -1;
+}
+
+function clickAction(path,filetype){
+	if (filetype == "folder"){
+		window.location = "index.php?f=" + path.replace("/", "\\");
 	} else {
-		$desthref = "getFile.php?path=".$driveRoot.$_GET['f']."\\".$value;
-		//$fileSizeRaw = filesize($driveAccessRoot.$_GET['filepos']."\\".$value);
-		$fileSize = human_filesize(filesize64($driveRoot.$_GET['f']."\\".$value));
-	}
-	if ($value == "."){
-		
-	} else {
-		echo "<div style='position:relative;top:0px;left:0px;width:100%;height:32px;'>";
-		echo "<a href='".$desthref."' style='position:absolute;top:5px;left:40px;'>".$value."</a>";
-		echo "<img style='position:absolute;top:0px;left:0px;width:32px;height:32px;' src='".$iconImageRoot.$icon."'></img>";
-		echo "<p style='color:#444444;position:absolute;right:26px;width:50px;top:4px;'>".$fileSize."</p>";
-		echo "</div>";
+		window.location = "getFile.php?path=" + path.replace("/", "\\");
 	}
 }
 
-echo '<div style="width:100%;background-color: #eeeeee; position:absolute; 
-bottom: 0px; z-index:0; left: 0px; height: 32px;">
-<p style="color:#444444;position:absolute;top:4px;left:64px;">Logged in as account '.$_SESSION['user'].' in group '.$_SESSION['group'].' </p><a style="color:#444444;position:absolute;right:50px;width:50px;top:4px;" href="logoutscript.php">Logout</a></div>';
+$("#renameFileMenuInput").keyup(function(event){
+    if(event.keyCode == 13){
+        CloseRFMenu();
+    }
+});
 
-?>
+rfpath = "";
 
-</div>
+function renameFile(path,file){
+  $("#renameFileMenuInput").val(file);
+  rfpath = path;
+  //alert(rfpath);
+  $("#renameFileMenu").css('height',"0px");
+  $("#renameFileMenu").css('width',"0px");
+  $("#renameFileMenu").css('top', py + "px");
+  $("#renameFileMenu").css('left', px + "px");
+  if ((py+48)>($(window).height() + $(document).scrollTop())){
+		$("#renameFileMenu").animate({height: '48px',width: '200px',top: ((py-48) +'px')},300);
+	} else {
+		$("#renameFileMenu").animate({height: '48px',width: '200px'},300);
+	}
+}
+
+function cMenu(path,fid,filetype,file){
+	//$("#contextualMenu").animate({top: '240px'});
+	$("#contextualMenu").css('height',"0px");
+	$("#contextualMenu").css('width',"0px");
+	$("#contextualMenu").css('top', py + "px");
+	$("#contextualMenu").css('left', px + "px");
+  $("#dcMenu1").css('background-color',"#eeeeee");
+  $("#dcMenu1").css('color',"#888888");
+	$("#dcMenu2").css('background-color',"#eeeeee");
+	$("#dcMenu2").css('color',"#888888");
+	$("#dcMenu3").css('background-color',"#eeeeee");
+	$("#dcMenu3").css('color',"#888888");
+	$("#dcMenu4").css('background-color',"#eeeeee");
+	$("#dcMenu4").css('color',"#888888");
+	$("#dcMenu5").css('background-color',"#eeeeee");
+	$("#dcMenu5").css('color',"#888888");
+  $("#cMenu1").attr("href", "");
+  $("#cMenu2").attr("onclick", "");
+  $("#cMenu5").attr("href", "");
+	//alert(filetype);
+	if (filetype == "folder"){
+		if (isInArray("DELETEFOLDER", permissions)) {
+			$("#dcMenu5").css('background-color',"#ffffff");
+			$("#dcMenu5").css('color',"#000000");
+      $("#cMenu5").attr("href", "deleteFolder.php?path=" + path.replace("/", "\\"));
+		}
+    if (isInArray("RENAME", permissions)) {
+			$("#dcMenu2").css('background-color',"#ffffff");
+			$("#dcMenu2").css('color',"#000000");
+      $("#cMenu2").attr("onclick", "renameFile('" + path.replace("\\", "/") + "','" + file.replace("/", "\\") + "')");
+		}
+	} else {
+    if (isInArray("RENAME", permissions)) {
+      $("#dcMenu2").css('background-color',"#ffffff");
+      $("#dcMenu2").css('color',"#000000");
+      $("#cMenu2").attr("onclick", "renameFile('" + path.replace("\\", "/") + "','" + file.replace("/", "\\") + "')");
+    }
+    if (isInArray("READ", permissions)) {
+      $("#dcMenu1").css('background-color',"#ffffff");
+  		$("#dcMenu1").css('color',"#000000");
+      $("#cMenu1").attr("href", "getFile.php?path=" + path.replace("/", "\\"));
+    }
+		if (isInArray("DELETE", permissions)) {
+			$("#dcMenu5").css('background-color',"#ffffff");
+			$("#dcMenu5").css('color',"#000000");
+      $("#cMenu5").attr("href", "deleteFile.php?path=" + path.replace("/", "\\"));
+		}
+	}
+	if ((py+240)>($(window).height() + $(document).scrollTop())){
+		$("#contextualMenu").animate({height: '240px',width: '200px',top: ((py-240) +'px')},300);
+	} else {
+		$("#contextualMenu").animate({height: '240px',width: '200px'},300);
+	}
+	//"getFile.php?path="
+}
+function CloseCMenu(){
+	$("#contextualMenu").animate({height: '0px',width: '0px'},300);
+}
+function CloseRFMenu(){
+	$("#renameFileMenu").animate({height: '0px',width: '0px'},300);
+  packedinput = $("#renameFileMenuInput").val().replace(".", "///fstp///").replace("&", "///amps///").replace("'", "///aphe///").replace('"', "///quot///");
+  packedpath = rfpath;
+  window.location="renameFile.php?rename=" + packedinput + "&path=" + packedpath;
+}
+</script>
+
 </body>
 </html>

@@ -35,10 +35,10 @@ session_start();
 padding-left:24px;padding-top:122px;padding-bottom:52px;padding-right:24px;
 margin-bottom:10px;
 ">
-<div style="width:100%;background-color: #444444; position:absolute; 
+<div style="width:100%;background-color: #444444; position:absolute;
 top: 0px; z-index:0; height:67px; left: 0px;
 ">
-<div style="height:36px;position:absolute; 
+<div style="height:36px;position:absolute;
 top: 0px; z-index:0; left: 0px;
 padding-left:24px;padding-top:12px;padding-bottom:19px;padding-right:24px;
 margin-bottom:0px;
@@ -49,6 +49,11 @@ if (isset($_SESSION['user'])){
 header("Location: login.php");
 die();
 }
+
+$logfile = fopen($_SESSION["logfile"], "a");
+fwrite($logfile, "   LIST at ".date('H:i:s')." on ".date('d F Y')."\r\n");
+fwrite($logfile, "      Directory : %DriveSelector%\r\n");
+fclose($logfile);
 
 //This function was taken from https://sourceforge.net/projects/soloadmin/
 //User:                        https://sourceforge.net/u/ucl/profile/
@@ -92,7 +97,7 @@ function filesize64($file)
 }
 //This function was taken from http://jeffreysambells.com/2012/10/25/human-readable-filesize-php
 //Author:                      Jeffrey Sambells
-function human_filesize($bytes, $dec = 2) 
+function human_filesize($bytes, $dec = 2)
 {
     $size   = array('B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
     $factor = floor((strlen($bytes) - 1) / 3);
@@ -116,7 +121,7 @@ $defaultIcon = $settings['defaultIcon'];
 $folderIcon = $settings['folderIcon'];
 
 echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='driveselector.php'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>Drives<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img></h3></a>";
-echo '</div></div><div style="width:100%;background-color: #eeeeee; position:absolute; 
+echo '</div></div><div style="width:100%;background-color: #eeeeee; position:absolute;
 top: 67px; z-index:0; left: 0px; height: 32px;">
 <p style="color:#444444;position:absolute;top:4px;left:64px;">Name</p></div>';
 
@@ -124,13 +129,13 @@ $files1 = $groupSettings['rootDirectories'];
 $i = 0;
 foreach ($files1 as &$value) {
 	echo "<div style='position:relative;top:0px;left:0px;width:100%;height:32px;'>";
-	echo "<a href='index.php?ri=".$i."' style='position:absolute;top:5px;left:40px;'>".$value."</a>";
+	echo "<a href='index.php?f=".$groupSettings['rootDirectories'][$i]."' style='position:absolute;top:5px;left:40px;'>".$value."</a>";
 	echo "<img style='position:absolute;top:0px;left:0px;width:32px;height:32px;' src='img/drive.png'></img>";
 	echo "</div>";
 	$i = $i + 1;
 }
 
-echo '<div style="width:100%;background-color: #eeeeee; position:absolute; 
+echo '<div style="width:100%;background-color: #eeeeee; position:absolute;
 bottom: 0px; z-index:0; left: 0px; height: 32px;">
 <p style="color:#444444;position:absolute;top:4px;left:64px;">Logged in as account '.$_SESSION['user'].' in group '.$_SESSION['group'].' </p><a style="color:#444444;position:absolute;right:50px;width:50px;top:4px;" href="logoutscript.php">Logout</a></div>';
 

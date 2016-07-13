@@ -1,3 +1,7 @@
+<?php
+if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
+?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
@@ -39,7 +43,7 @@ if (isset($_GET['err'])){
 	}
 }
 ?>
-<form action="loginscript.php" method="POST" style="max-width:1000px;padding-right:38px;">
+<form action="loginscript.php" method="POST" style="max-width:500px;padding-right:38px;">
 <input class="field" style="position:relative; width:100%;height: 25px;" type="text" name="username" id="username" placeholder="Username"></input>
 <input class="field" style="position:relative; width:100%;height: 25px;" type="password" name="password" id="password" placeholder="Password"></input>
 <input id="button1" style="width: 0.1px;height: 0.1px;opacity: 0;overflow: hidden;position: absolute;z-index: -1;" type="submit"></input>

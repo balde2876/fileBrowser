@@ -19,27 +19,22 @@ foreach ($breadcrumbs as &$value) {
 	$i = $i + 1;
 }
 //echo json_encode($permissions);
-if (in_array("READ",$permissions)){
-	//echo $file;
+if (in_array("DELETE",$permissions)){
 	$logfile = fopen($_SESSION["logfile"], "a");
-	fwrite($logfile, "   READ at ".date('H:i:s')." on ".date('d F Y')."\r\n");
+	fwrite($logfile, "   DELETE at ".date('H:i:s')." on ".date('d F Y')."\r\n");
 	fwrite($logfile, "      File : ".$file."\r\n");
 	fclose($logfile);
-
+	//echo $file;
 	if (file_exists($file)) {
-		header('Content-Description: File Transfer');
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="'.basename($file).'"');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate');
-		header('Pragma: public');
-		header('Content-Length: ' . filesize($file));
-		readfile($file);
+		unlink($file);
+		if (isset($_SERVER["HTTP_REFERER"])) {
+        header("Location: " . $_SERVER["HTTP_REFERER"]);
+    }
 		exit;
 	}
 } else {
 	$logfile = fopen($_SESSION["logfile"], "a");
-	fwrite($logfile, "   DENIED READ at ".date('H:i:s')." on ".date('d F Y')."\r\n");
+	fwrite($logfile, "   DENIED DELETE at ".date('H:i:s')." on ".date('d F Y')."\r\n");
 	fwrite($logfile, "      File : ".$file."\r\n");
 	fclose($logfile);
 	header('Location: insufficientPermissions.php');
