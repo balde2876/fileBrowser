@@ -145,6 +145,7 @@ foreach ($breadcrumbs as &$value) {
 	$i = $i + 1;
 }
 
+echo "<p id='curDir' hidden>".$dir."</p>";
 echo "<p id='groupPermissionsJson' hidden>".json_encode($permissions)."</p>";
 //echo "<p id='groupPermissionsJson' hidden>".$permissions."</p>";
 echo '</div></div><div style="width:100%;background-color: #eeeeee; position:absolute;
@@ -231,6 +232,37 @@ bottom: 0px; z-index:0; left: 0px; height: 32px;">
 	</div></a>
 </div>
 
+<style>
+#filedrag
+{
+	display: none;
+	font-weight: bold;
+	text-align: center;
+	padding: 1em 0;
+	margin: 1em 0;
+	color: #555;
+	border: 2px dashed #555;
+	border-radius: 7px;
+	cursor: default;
+}
+
+#filedrag.hover
+{
+	color: #f00;
+	border-color: #f00;
+	border-style: solid;
+	box-shadow: inset 0 3px 4px #888;
+}
+</style>
+
+<div id="dropzone" class="materialInset" style="display: none;position:absolute;top:10px;left:10px;width:100px;height:100px;z-index:60;">
+  <form id="upload_form" style="position:absolute;top:45px;left:45px;z-index:5;" enctype="multipart/form-data" method="post" style="height:90px;margin-bottom:40px;">
+    <input style="width: 100px;height: 30px;opacity: 0;overflow: hidden;position: absolute;" type="file" name="file1" id="file1"></input>
+  </form>
+  <img src="img/upload.png" style="position:absolute;top:20px;left:20px;height:60px;width:60px;z-index:3;"></img>
+  <div id="progressBarBitJs" style="position:absolute;top:0px;left:0px;width:100px;height:0px;background-color:#88ff00;z-index:1;"></div>
+</div>
+
 <script>
 document.addEventListener("click", CloseCMenu);
 px = 20;
@@ -240,8 +272,81 @@ $( document ).on( "mousemove", function( event ) {
 	py = event.pageY;
 });
 permissions = JSON.parse($("#groupPermissionsJson").text())
+
 for (i = 0; i < permissions.length; i++) {
     console.log(permissions[i]);
+}
+
+var dragTimer;
+$("#dropzone").hide();
+$(document).on('dragover', function(e) {
+    var dt = e.originalEvent.dataTransfer;
+    if(dt.types != null && (dt.types.indexOf ? dt.types.indexOf('Files') != -1 : dt.types.contains('application/x-moz-file'))) {
+        $("#dropzone").show();
+        window.clearTimeout(dragTimer);
+    }
+    e = e || window.event;
+    var posX = e.originalEvent.pageX;
+    var posY = e.originalEvent.pageY;
+    $("#dropzone").css({top: posY - 50, left: posX - 50});
+});
+$(document).on('dragleave', function(e) {
+    dragTimer = window.setTimeout(function() {
+        $("#dropzone").hide();
+    }, 25);
+});
+
+$("#file1").on('change',function(){
+    uploadFile();
+});
+
+function _(el){
+	return document.getElementById(el);
+}
+function uploadFile(){
+	var file = _("file1").files[0];
+	var formdata = new FormData();
+	formdata.append("file1", file);
+  formdata.append("path", $("#curDir").text());
+	var ajax = new XMLHttpRequest();
+	ajax.upload.addEventListener("progress", progressHandler, false);
+	ajax.addEventListener("load", completeHandler, false);
+	ajax.addEventListener("error", errorHandler, false);
+	ajax.addEventListener("abort", abortHandler, false);
+	ajax.open("POST", "fileupload.php");
+	ajax.send(formdata);
+}
+function progressHandler(event){
+	//_("loaded_n_total").innerHTML = "Uploaded "+event.loaded+" bytes of "+event.total;
+  $("#dropzone").show();
+  window.clearTimeout(dragTimer);
+  var percent = (event.loaded / event.total) * 100;
+  _("progressBarBitJs").style.top = (100 - ((event.loaded / event.total)*100)) + "px";
+	_("progressBarBitJs").style.height = ((event.loaded / event.total)*100) + "px";
+  _("progressBarBitJs").style.backgroundColor = "#88ff00";
+	//console.log(Math.round(percent)+"% uploaded... please wait");
+}
+function completeHandler(event){
+  $("#dropzone").hide();
+	console.log(event.target.responseText);
+	_("progressBarBitJs").style.height = "0px";
+  location.reload();
+}
+function errorHandler(event){
+	_("progressBarBitJs").style.height = "100px";
+	_("progressBarBitJs").style.top = "0px";
+  _("progressBarBitJs").style.backgroundColor = "#FF2E00";
+  window.setTimeout(function() {
+      $("#dropzone").hide();
+  }, 2000);
+}
+function abortHandler(event){
+	_("progressBarBitJs").style.height = "100px";
+  _("progressBarBitJs").style.top = "0px";
+  _("progressBarBitJs").style.backgroundColor = "#FF2E00";
+  window.setTimeout(function() {
+      $("#dropzone").hide();
+  }, 2000);
 }
 
 function isInArray(value, array) {
