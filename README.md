@@ -1,5 +1,6 @@
 # File Browser #
 A simple online file browser with an easy JSON options file and streamlined features all wrapped up in a nice modern design.
+![example of the interface](https://github.com/balde2876/fileBrowser/blob/master/example.png)
 ## Features ##
 * Multiple Users
 * Permission Groups
