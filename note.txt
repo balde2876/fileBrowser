@@ -1,2 +1,3 @@
 passwords in users.json are SHA512 hashes
-guer guest's password is 1234
+there is no in built way to create users YET
+guest's password is 1234
