@@ -32,7 +32,51 @@ if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTT
 </head>
 <body oncontextmenu="return false">
 
-<div class="material" id="jss001" style="width:calc(100% - 68px);background-color: #ffffff; position:absolute; top: 10px; left:10px; overflow: hidden; z-index:1;
+<div class="material" id="loaddialog" style="width:calc(100% - 68px);height:0px;background-color: #ffffff; position:absolute; top: 10px; left:10px; overflow: hidden; z-index:1;
+padding-left:24px;padding-top:122px;padding-bottom:52px;padding-right:24px;
+margin-bottom:10px;">
+<div style="width:100%;background-color: #444444; position:absolute;
+top: 0px; z-index:0; height:67px; left: 0px;
+">
+<div style="height:36px;position:absolute;
+top: 0px; z-index:0; left: 0px;
+padding-left:24px;padding-top:12px;padding-bottom:19px;padding-right:24px;
+margin-bottom:0px;
+">
+<?php
+
+$dir = "";
+if (isset($_GET['f'])){
+$dir = str_replace(array("///fstp///","/"),array(".","\\"),$_GET['f']);
+} else {
+$dir = "";
+}
+$breadcrumbs = explode("\\", str_replace("/","\\",$dir));
+$i = 1;
+$temp1 = "";
+echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='driveselector.php'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>Drives<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img></h3></a>";
+foreach ($breadcrumbs as &$value) {
+	$value1 = $value;
+	$end = "";
+	if ($i < count($breadcrumbs)){
+		echo "<a style='position:relative;top:-10px;height:36px;display:inline;padding-right:5px;' href='index.php?f=".implode("\\", array_slice($breadcrumbs,0,$i)).$end."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1."<img src='img/breadcrumb.png' style='position:relative;top:11px;left:5px;height:36px;display:inline;'></img>";
+	} else {
+		echo "<a style='position:relative;top:5px;height:36px;display:inline;padding-right:5px;' href='index.php?f=".implode("\\", array_slice($breadcrumbs,0,$i)).$end."'><h3 style='color:#ffffff;position:relative;top:2px;height:36px;display:inline;'>".$value1;
+	}
+	echo "</h3></a>";
+	$temp1 = $temp1.$value1."/";
+	$i = $i + 1;
+}
+
+?>
+</div></div>
+<div style="width:100%;background-color: #eeeeee; position:absolute;
+top: 67px; z-index:0; left: 0px; height: 32px;">
+<p style="color:#444444;position:absolute;top:4px;left:64px;">Name</p><p style="color:#444444;position:absolute;right:50px;width:50px;top:4px;">Size</p></div>
+<p style="position:absolute;top:120px;left:24px;color:#bbbbbb;font-size:16pt;">Loading...</p>
+</div>
+
+<div class="material" id="mainpage" style="display: none;width:calc(100% - 68px);background-color: #ffffff; position:absolute; top: 10px; left:10px; overflow: hidden; z-index:1;
 padding-left:24px;padding-top:122px;padding-bottom:52px;padding-right:24px;
 margin-bottom:10px;
 ">
@@ -255,12 +299,12 @@ bottom: 0px; z-index:0; left: 0px; height: 32px;">
 }
 </style>
 
-<div id="dropzone" class="materialInset" style="display: none;position:absolute;top:10px;left:10px;width:100px;height:100px;z-index:60;">
-  <form id="upload_form" style="position:absolute;top:45px;left:45px;z-index:5;" enctype="multipart/form-data" method="post" style="height:90px;margin-bottom:40px;">
-    <input style="width: 100px;height: 30px;opacity: 0;overflow: hidden;position: absolute;" type="file" name="file1" id="file1"></input>
+<div id="dropzone" class="materialInset" style="display: none;position:absolute;top:10px;left:10px;width:120px;height:120px;z-index:60;">
+  <form id="upload_form" style="position:absolute;top:95px;left:55px;z-index:5;" enctype="multipart/form-data" method="post" style="height:90px;margin-bottom:40px;">
+    <input style="width: 100px;height: 30px;opacity: 0;overflow: hidden;position: absolute;" type="file" name="file1[]" id="file1" multiple=""></input>
   </form>
-  <img src="img/upload.png" style="position:absolute;top:20px;left:20px;height:60px;width:60px;z-index:3;"></img>
-  <div id="progressBarBitJs" style="position:absolute;top:0px;left:0px;width:100px;height:0px;background-color:#88ff00;z-index:1;"></div>
+  <img src="img/upload.png" style="position:absolute;top:30px;left:30px;height:60px;width:60px;z-index:3;"></img>
+  <div id="progressBarBitJs" style="position:absolute;top:0px;left:0px;width:120px;height:0px;background-color:#88ff00;z-index:1;"></div>
 </div>
 
 <script>
@@ -279,6 +323,8 @@ for (i = 0; i < permissions.length; i++) {
 
 var dragTimer;
 $("#dropzone").hide();
+$("#loaddialog").hide();
+$("#mainpage").show();
 $(document).on('dragover', function(e) {
     var dt = e.originalEvent.dataTransfer;
     if(dt.types != null && (dt.types.indexOf ? dt.types.indexOf('Files') != -1 : dt.types.contains('application/x-moz-file'))) {
@@ -288,7 +334,7 @@ $(document).on('dragover', function(e) {
     e = e || window.event;
     var posX = e.originalEvent.pageX;
     var posY = e.originalEvent.pageY;
-    $("#dropzone").css({top: posY - 50, left: posX - 50});
+    $("#dropzone").css({top: posY - 100, left: posX - 60});
 });
 $(document).on('dragleave', function(e) {
     dragTimer = window.setTimeout(function() {
@@ -304,9 +350,11 @@ function _(el){
 	return document.getElementById(el);
 }
 function uploadFile(){
-	var file = _("file1").files[0];
 	var formdata = new FormData();
-	formdata.append("file1", file);
+  for (i = 0; i < _("file1").files.length; i++) {
+    var file = _("file1").files[i];
+  	formdata.append("file" + i.toString(), file);
+  }
   formdata.append("path", $("#curDir").text());
 	var ajax = new XMLHttpRequest();
 	ajax.upload.addEventListener("progress", progressHandler, false);
@@ -321,8 +369,8 @@ function progressHandler(event){
   $("#dropzone").show();
   window.clearTimeout(dragTimer);
   var percent = (event.loaded / event.total) * 100;
-  _("progressBarBitJs").style.top = (100 - ((event.loaded / event.total)*100)) + "px";
-	_("progressBarBitJs").style.height = ((event.loaded / event.total)*100) + "px";
+  _("progressBarBitJs").style.top = (120 - ((event.loaded / event.total)*120)) + "px";
+	_("progressBarBitJs").style.height = ((event.loaded / event.total)*120) + "px";
   _("progressBarBitJs").style.backgroundColor = "#88ff00";
 	//console.log(Math.round(percent)+"% uploaded... please wait");
 }
@@ -333,7 +381,7 @@ function completeHandler(event){
   location.reload();
 }
 function errorHandler(event){
-	_("progressBarBitJs").style.height = "100px";
+	_("progressBarBitJs").style.height = "120px";
 	_("progressBarBitJs").style.top = "0px";
   _("progressBarBitJs").style.backgroundColor = "#FF2E00";
   window.setTimeout(function() {
@@ -341,7 +389,7 @@ function errorHandler(event){
   }, 2000);
 }
 function abortHandler(event){
-	_("progressBarBitJs").style.height = "100px";
+	_("progressBarBitJs").style.height = "120px";
   _("progressBarBitJs").style.top = "0px";
   _("progressBarBitJs").style.backgroundColor = "#FF2E00";
   window.setTimeout(function() {
