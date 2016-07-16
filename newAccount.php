@@ -28,32 +28,30 @@ top: 0px; z-index:0; left: 0px;
 padding-left:24px;padding-top:12px;padding-bottom:19px;padding-right:24px;
 margin-bottom:0px;
 ">
-<h3 style='color:#ffffff;position:relative;top:5px;height:36px;display:inline;padding-right:5px;'>Login</h3>
+<h3 style='color:#ffffff;position:relative;top:5px;height:36px;display:inline;padding-right:5px;'>New Account</h3>
 </div></div>
 <div style="width:100%;background-color: #eeeeee; position:absolute;top: 67px; z-index:0; left: 0px; height: 32px;">
 </div>
-<form action="loginscript.php" method="POST" style="max-width:400px;padding-right:38px;">
+<form action="naccscript.php" method="POST" style="max-width:400px;padding-right:38px;">
 <input class="field" style="position:relative; width:100%;height: 25px;" type="text" name="username" id="username" placeholder="Username"></input>
 <input class="field" style="position:relative; width:100%;height: 25px;" type="password" name="password" id="password" placeholder="Password"></input>
+<input class="field" style="position:relative; width:100%;height: 25px;" type="password" name="password2" id="password2" placeholder="Password Again"></input>
 <input id="button1" style="width: 0.1px;height: 0.1px;opacity: 0;overflow: hidden;position: absolute;z-index: -1;" type="submit"></input>
-<label for="button1"><div class="btn" style="position:relative;width:100%; height: 25px;">Login</div></label>
+<label for="button1"><div class="btn" style="position:relative;width:100%; height: 25px;">Create account</div></label>
 </form>
 <img style='position:absolute;top:126px;left:24px;width:32px;height:32px;' src='img/id.png'></img>
 </br>
 <?php
 if (isset($_GET['err'])){
-	if ($_GET['err'] == "pwi"){
-		echo "<h3>Password incorrect</h3></br>";
+	if ($_GET['err'] == "pnm"){
+		echo "<h3>Passwords don't match</h3></br>";
 	}
-	if ($_GET['err'] == "ane"){
-		echo "<h3>Account does not exist</h3></br>";
-	}
-	if ($_GET['err'] == "lgo"){
-		echo "<h3>Logged out successfully</h3></br>";
+	if ($_GET['err'] == "aae"){
+		echo "<h3>Account already exists</h3></br>";
 	}
 }
 ?>
-<a href="newAccount.php">New account</a>
+<a href="login.php">Login to existing account</a>
 </div>
 </body>
 </html>
