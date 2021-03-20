@@ -1,0 +1,16 @@
+Session Start
+   LOGIN at 23:18:48 on 20 March 2021
+      Account : GUEST
+      Group : USERS
+      Client IP : ::1
+      Session ID : pqls04kebj3tni38fsb9ju3tml
+   LIST at 23:18:48 on 20 March 2021
+      Directory : %DriveSelector%
+   LIST at 23:18:50 on 20 March 2021
+      Directory : C:\
+   LIST at 23:18:53 on 20 March 2021
+      Directory : C:\\Users
+   LIST at 23:18:54 on 20 March 2021
+      Directory : C:\\Users\alex
+   LIST at 23:18:57 on 20 March 2021
+      Directory : C:\\Users\alex\Downloads
