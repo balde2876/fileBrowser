@@ -32,7 +32,7 @@ margin-bottom:0px;
 </div></div>
 <div style="width:100%;background-color: #eeeeee; position:absolute;top: 67px; z-index:0; left: 0px; height: 32px;">
 </div>
-<form action="naccscript.php" method="POST" style="max-width:400px;padding-right:38px;">
+<form action="newAccountScript.php" method="POST" style="max-width:400px;padding-right:38px;">
 <input class="field" style="position:relative; width:100%;height: 25px;" type="text" name="username" id="username" placeholder="Username"></input>
 <input class="field" style="position:relative; width:100%;height: 25px;" type="password" name="password" id="password" placeholder="Password"></input>
 <input class="field" style="position:relative; width:100%;height: 25px;" type="password" name="password2" id="password2" placeholder="Password Again"></input>

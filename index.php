@@ -236,16 +236,19 @@ if (in_array("LIST",$permissions)){
 
 
 } else {
-  $logfile = fopen($_SESSION["logfile"], "a");
-  fwrite($logfile, "   DENIED LIST at ".date('H:i:s')." on ".date('d F Y')."\r\n");
-  fwrite($logfile, "      Directory : ".$dir."\r\n");
-  fclose($logfile);
+	$logfile = fopen($_SESSION["logfile"], "a");
+	fwrite($logfile, "   DENIED LIST at ".date('H:i:s')." on ".date('d F Y')."\r\n");
+	fwrite($logfile, "      Directory : ".$dir."\r\n");
+	fclose($logfile);
 
 	echo "<h3>You do not have list permissions for this folder</h3>";
+	for ($i = 0; $i < count($permissions); $i++) {
+		echo $permissions[$i];
+	}
 }
 echo '<div style="width:100%;background-color: #eeeeee; position:absolute;
 bottom: 0px; z-index:0; left: 0px; height: 32px;">
-<p style="color:#444444;position:absolute;top:4px;left:64px;">Logged in as account '.$_SESSION['user'].' in group '.$_SESSION['group'].' </p><a style="color:#444444;position:absolute;right:50px;width:50px;top:4px;" href="logoutscript.php">Logout</a></div>';
+<p style="color:#444444;position:absolute;top:4px;left:64px;">Logged in as account '.$_SESSION['user'].' in group '.$_SESSION['group'].' </p><a style="color:#444444;position:absolute;right:50px;width:50px;top:4px;" href="logoutScript.php">Logout</a></div>';
 ?>
 </div>
 
@@ -361,7 +364,7 @@ function uploadFile(){
 	ajax.addEventListener("load", completeHandler, false);
 	ajax.addEventListener("error", errorHandler, false);
 	ajax.addEventListener("abort", abortHandler, false);
-	ajax.open("POST", "fileupload.php");
+	ajax.open("POST", "fileUpload.php");
 	ajax.send(formdata);
 }
 function progressHandler(event){

@@ -1,10 +1,16 @@
 {
 	"USERS":{
-		"rootDirectories":["D:/Media", "C:/"],
-		"defaultRootIndex":1,
+		"rootDirectories":["C:/"],
+		"defaultRootIndex":0,
 		"permissions":{
-			"C:/":["READ"],
-			"D:/Media":["READ","WRITE"]
+			"C:/":["READ","LIST"]
+		}
+	},
+	"ADMIN":{
+		"rootDirectories":["C:/"],
+		"defaultRootIndex":0,
+		"permissions":{
+			"C:/":["READ","LIST","WRITE","DELETE","RENAME"]
 		}
 	}
 }
